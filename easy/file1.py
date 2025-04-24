@@ -17,6 +17,8 @@ class WordSearchGame:
         self.found_words = set()
         self.create_widgets()
         self.bind_events()
+        self.mouse_down = False
+        self.last_label = None
 
     def create_empty_grid(self, size):
         return [['' for _ in range(size)] for _ in range(size)]
@@ -79,24 +81,28 @@ class WordSearchGame:
         self.found_label.grid(row=GRID_SIZE + 2, column=0, columnspan=GRID_SIZE, pady=5)
 
     def bind_events(self):
-        for i in range(GRID_SIZE):
-            for j in range(GRID_SIZE):
-                label = self.labels[i][j]
-                label.bind("<Button-1>", self.start_selection)
-                label.bind("<Enter>", self.track_selection)
-                label.bind("<ButtonRelease-1>", self.end_selection)
+        self.master.bind("<Button-1>", self.start_selection)
+        self.master.bind("<B1-Motion>", self.track_selection)
+        self.master.bind("<ButtonRelease-1>", self.end_selection)
+        self.master.bind("<Leave>", lambda e: setattr(self, 'mouse_down', False))
 
     def start_selection(self, event):
+        self.mouse_down = True 
         self.clear_selection()
-        label = event.widget
-        self.select_cell(label)
+        widget = event.widget.winfo_containing(event.x_root, event.y_root)
+        if isinstance(widget, tk.Label):
+            self.select_cell(widget)
 
     def track_selection(self, event):
-        label = event.widget
-        if event.state & 0x0100:  
-            self.select_cell(label)
+        if not self.mouse_down:
+            return 
+        widget = event.widget.winfo_containing(event.x_root, event.y_root)
+        if isinstance(widget, tk.Label) and widget != self.last_label:
+            self.select_cell(widget)
+            self.last_label = widget
 
     def end_selection(self, event):
+        self.mouse_down = False
         word = ''.join([self.grid[label.row][label.col] for label in self.selected_cells])
         reversed_word = word[::-1]
 
@@ -106,15 +112,18 @@ class WordSearchGame:
             self.mark_word_found(reversed_word)
         else:
             self.clear_selection()
+        self.last_label = None 
 
     def select_cell(self, label):
         if label not in self.selected_cells:
+            print(f"Selected cell: ({label.row}, {label.col}) -> {label.cget('text')}")
             label.config(bg="lightblue")
             self.selected_cells.append(label)
 
     def clear_selection(self):
         for label in self.selected_cells:
-            if f"{label.row},{label.col}" not in self.found_words:
+            key = f"{label.row},{label.col}" 
+            if key not in self.found_words:
                 label.config(bg="white")
         self.selected_cells = []
 
@@ -129,6 +138,8 @@ class WordSearchGame:
     def update_found_words(self):
         found_display = "Found: " + ", ".join(sorted(self.found_words.intersection(COUNTRIES)))
         self.found_label.config(text=found_display)
+
+        self.master.bind("Leave", lambda e: setattr(self, 'mouse_down', False))
 
 if __name__ == "__main__":
     root = tk.Tk()
