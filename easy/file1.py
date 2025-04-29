@@ -67,11 +67,12 @@ class WordSearchGame:
         for i in range(GRID_SIZE):
             for j in range(GRID_SIZE):
                 label = tk.Label(self.master, text=self.grid[i][j], font=('Consolas', 14),
-                                 width=2, height=1, borderwidth=1, relief="solid", bg="white")
-                label.grid(row=i, column=j)
+                                 width=2, height=1, borderwidth=1, relief="solid", bg="white",padx=5, pady=5)
+                label.grid(row=i, column=j,padx=3, pady=3)
                 label.row = i
                 label.col = j
                 self.labels[i][j] = label
+
 
         self.word_label = tk.Label(self.master, text="Find these countries:\n" + ", ".join(COUNTRIES),
                                    font=("Arial", 12, "bold"))
@@ -141,6 +142,8 @@ class WordSearchGame:
         self.found_label.config(text=found_display)
 
         self.master.bind("Leave", lambda e: setattr(self, 'mouse_down', False))
+
+        
 
 if __name__ == "__main__":
     root = tk.Tk()
