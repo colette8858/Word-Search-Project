@@ -141,6 +141,9 @@ class WordSearchGame:
 
         self.master.bind("Leave", lambda e: setattr(self, 'mouse_down', False))
 
+
+
+
 if __name__ == "__main__":
     root = tk.Tk()
     app = WordSearchGame(root)
