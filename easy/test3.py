@@ -58,7 +58,7 @@ class WordSearch:
         for i in range(GRID_SIZE):
             for j in range(GRID_SIZE):
                 lbl = tk.Label(self.root, text=self.grid[i][j], font=('Consolas', 16), width=2, height=1,
-                               borderwidth=2, relief="sunken", bg="white",)
+                               borderwidth=0, relief="sunken", bg="white",)
                 lbl.grid(row=i, column=j)
                 lbl.row, lbl.col = i, j
                 self.labels[i][j] = lbl
@@ -98,8 +98,8 @@ class WordSearch:
             self.clear_selection()
 
     def select_label_under_mouse(self, event):
-
         widget = event.widget.winfo_containing(event.x_root, event.y_root)
+        
         if isinstance(widget, tk.Label) and widget not in self.selected_labels:
             if not self.selected_labels or self.is_adjacent(widget, self.selected_labels[-1]):
                 widget.config(bg="lightblue")

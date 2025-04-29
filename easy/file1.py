@@ -85,43 +85,39 @@ class WordSearchGame:
         self.master.bind("<Button-1>", self.start_selection)
         self.master.bind("<B1-Motion>", self.track_selection)
         self.master.bind("<ButtonRelease-1>", self.end_selection)
-        self.master.bind("<Leave>", lambda e: setattr(self, 'mouse_down', False))
 
     def start_selection(self, event):
-        self.mouse_down = True 
+        self.mouse_down = True
         self.clear_selection()
-        widget = event.widget.winfo_containing(event.x_root, event.y_root)
-        if isinstance(widget, tk.Label):
-            self.select_cell(widget)
+        self.select_cell(event)
 
     def track_selection(self, event):
-        if not self.mouse_down:
-            return 
-        widget = event.widget.winfo_containing(event.x_root, event.y_root)
-        if isinstance(widget, tk.Label) and widget != self.last_label:
-            self.select_cell(widget)
-            self.last_label = widget
-
+        if self.mouse_down:
+            self.select_cell(event)
+        
     def end_selection(self, event):
         self.mouse_down = False
-        word = ''.join([self.grid[label.row][label.col] for label in self.selected_cells])
+        word = ''.join(lbl.cget("text") for lbl in self.selected_cells)
         reversed_word = word[::-1]
-
         if word in COUNTRIES and word not in self.found_words:
-            self.mark_word_found(word)
+            self.mark_found(word)
         elif reversed_word in COUNTRIES and reversed_word not in self.found_words:
-            self.mark_word_found(reversed_word)
+            self.mark_found(reversed_word)
+        elif word in COUNTRIES and word in self.found_words:
+            self.mark_found(word)
         else:
             self.clear_selection()
-        self.last_label = None 
 
-    def select_cell(self, label):
-        key = f"{label.row},{label.col}" 
-        if label not in self.selected_cells and key not in self.found_words:
-            print(f"Selected cell: ({label.row}, {label.col}) -> {label.cget('text')}")
-            label.config(bg="lightblue")
-            self.selected_cells.append(label)
-
+    def select_cell(self, event):
+        widget = event.widget.winfo_containing(event.x_root, event.y_root)
+        if isinstance(widget, tk.Label) and widget not in self.selected_cells:
+            if not self.selected_cells or self.is_adjacent(widget, self.selected_cells[-1]):
+                widget.config(bg="lightblue")
+                self.selected_cells.append(widget)
+        
+    def is_adjacent(self, lbl1, lbl2):
+        return abs(lbl1.row - lbl2.row) <= 1 and abs(lbl1.col - lbl2.col) <= 1
+    
     def clear_selection(self):
         for label in self.selected_cells:
             key = f"{label.row},{label.col}" 
