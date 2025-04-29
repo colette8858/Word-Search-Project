@@ -115,7 +115,8 @@ class WordSearchGame:
         self.last_label = None 
 
     def select_cell(self, label):
-        if label not in self.selected_cells:
+        key = f"{label.row},{label.col}" 
+        if label not in self.selected_cells and key not in self.found_words:
             print(f"Selected cell: ({label.row}, {label.col}) -> {label.cget('text')}")
             label.config(bg="lightblue")
             self.selected_cells.append(label)
@@ -140,6 +141,9 @@ class WordSearchGame:
         self.found_label.config(text=found_display)
 
         self.master.bind("Leave", lambda e: setattr(self, 'mouse_down', False))
+
+
+
 
 if __name__ == "__main__":
     root = tk.Tk()
