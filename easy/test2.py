@@ -1,6 +1,8 @@
 import tkinter as tk
+import tkinter.messagebox as mbox
 import random
 import string
+
 
 WORDS_TO_FIND = ["CROATIA", "ITALY", "BRAZIL", "FRANCE", "SWITZERLAND", "EGYPT"]
 GRID_SIZE = 15
@@ -56,7 +58,7 @@ class WordSearch:
         for i in range(GRID_SIZE):
             for j in range(GRID_SIZE):
                 lbl = tk.Label(self.root, text=self.grid[i][j], font=('Consolas', 16), width=2, height=1,
-                               borderwidth=1, relief="solid", bg="white")
+                               borderwidth=0, relief="sunken", bg="white",)
                 lbl.grid(row=i, column=j)
                 lbl.row, lbl.col = i, j
                 self.labels[i][j] = lbl
@@ -75,13 +77,15 @@ class WordSearch:
 
     def on_mouse_down(self, event):
         self.mouse_down = True
+        
+        print(self.start_pos)
         self.clear_selection()
         self.select_label_under_mouse(event)
 
     def on_mouse_drag(self, event):
         if self.mouse_down:
             self.select_label_under_mouse(event)
-
+        
     def on_mouse_up(self, event):
         self.mouse_down = False
         word = ''.join(lbl.cget("text") for lbl in self.selected_labels)
@@ -90,15 +94,23 @@ class WordSearch:
             self.mark_found(word)
         elif reversed_word in WORDS_TO_FIND and reversed_word not in self.found_words:
             self.mark_found(reversed_word)
+        elif word in WORDS_TO_FIND and word in self.found_words:
+            self.mark_found(word)
         else:
             self.clear_selection()
 
     def select_label_under_mouse(self, event):
+
         widget = event.widget.winfo_containing(event.x_root, event.y_root)
         if isinstance(widget, tk.Label) and widget not in self.selected_labels:
-            widget.config(bg="lightblue")
-            self.selected_labels.append(widget)
+            if not self.selected_labels or self.is_adjacent(widget, self.selected_labels[-1]):
+                widget.config(bg="lightblue")
+                self.selected_labels.append(widget)
+        
 
+    def is_adjacent(self, lbl1, lbl2):
+        return abs(lbl1.row - lbl2.row) <= 1 and abs(lbl1.col - lbl2.col) <= 1
+    
     def clear_selection(self):
         for lbl in self.selected_labels:
             lbl.config(bg="white")
@@ -110,6 +122,8 @@ class WordSearch:
         self.found_words.add(word)
         self.update_found_label()
         self.selected_labels.clear()
+        if len(self.found_words) == len(WORDS_TO_FIND):
+            tk.mbox.showinfo("Good job, You found all the word!")
 
     def update_found_label(self):
         self.found_label.config(text="Found: " + ", ".join(sorted(self.found_words)))
