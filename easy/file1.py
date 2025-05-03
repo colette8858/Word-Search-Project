@@ -1,5 +1,5 @@
 import tkinter as tk
-
+import tkinter.messagebox as mbox
 
 import random
 import string
@@ -100,11 +100,11 @@ class WordSearchGame:
         word = ''.join(lbl.cget("text") for lbl in self.selected_cells)
         reversed_word = word[::-1]
         if word in COUNTRIES and word not in self.found_words:
-            self.mark_found(word)
+            self.mark_word_found(word)
         elif reversed_word in COUNTRIES and reversed_word not in self.found_words:
-            self.mark_found(reversed_word)
+            self.mark_word_found(reversed_word)
         elif word in COUNTRIES and word in self.found_words:
-            self.mark_found(word)
+            self.mark_word_found(word)
         else:
             self.clear_selection()
 
@@ -132,15 +132,12 @@ class WordSearchGame:
         self.found_words.add(word)
         self.update_found_words()
         self.selected_cells = []
+        if len.strip(self.found_words) == len.strip(COUNTRIES):
+            mbox.showinfo("Good job, You found all the word!")
 
     def update_found_words(self):
         found_display = "Found: " + ", ".join(sorted(self.found_words.intersection(COUNTRIES)))
         self.found_label.config(text=found_display)
-
-        self.master.bind("Leave", lambda e: setattr(self, 'mouse_down', False))
-
-
-
 
 if __name__ == "__main__":
     root = tk.Tk()
